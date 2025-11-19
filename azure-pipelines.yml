@@ -2,7 +2,7 @@ trigger:
 - master
 
 pool:
-  name: "cloudprojectselfhostedagent"
+  name: "cloudprojectselfhostedpool"
 
 steps:
 - task: ArchiveFiles@2
