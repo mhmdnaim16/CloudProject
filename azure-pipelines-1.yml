@@ -15,15 +15,13 @@ steps:
 - script: composer install --no-interaction --prefer-dist --optimize-autoloader
   displayName: "Install Composer dependencies"
 
-# 3. Laravel APP_KEY generate
-- script: php artisan key:generate
-  displayName: "Generate APP_KEY"
+# REMOVE key:generate (this causes the error)
 
-# 4. Laravel optimization
+# 3. Laravel optimize
 - script: php artisan optimize
   displayName: "Optimize Laravel"
 
-# 5. Create artifact (App Service standard format)
+# 4. Create artifact (zip)
 - task: ArchiveFiles@2
   displayName: "Archive project files to app.zip"
   inputs:
@@ -33,7 +31,7 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
     replaceExistingArchive: true
 
-# 6. Publish artifact
+# 5. Publish artifact
 - task: PublishBuildArtifacts@1
   displayName: "Publish Artifact: phppapp"
   inputs:
