@@ -2,19 +2,31 @@ trigger:
 - master
 
 pool:
-  name: "CloudProjectPool"
+  vmImage: 'ubuntu-latest'
 
 steps:
+
+- task: UsePhpVersion@0
+  inputs:
+    versionSpec: '8.2'
+
+- script: |
+    php -v
+    composer install --no-dev --optimize-autoloader
+    cp .env.example .env
+    php artisan key:generate
+    php artisan config:cache
+  displayName: 'Build Laravel'
+
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)'
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
     includeRootFolder: false
     archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/laravel.zip'
     replaceExistingArchive: true
 
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'phpapp'
-    publishLocation: 'Container'
+    ArtifactName: 'drop'
