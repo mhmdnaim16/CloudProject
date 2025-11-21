@@ -1,40 +1,30 @@
 trigger:
-- main
 - master
 
 pool:
-  name: CloudProjectPool
+  name: CloudProjectPool   # your self-hosted agent pool
 
 steps:
+- script: |
+    php -v
+  displayName: 'Show PHP version'
 
-# 1. Show PHP version
-- script: php -v
-  displayName: "Show PHP version"
+- script: |
+    composer install --no-dev --optimize-autoloader
+  displayName: 'Install Composer dependencies'
 
-# 2. Install Composer dependencies
-- script: composer install --no-interaction --prefer-dist --optimize-autoloader
-  displayName: "Install Composer dependencies"
+- script: |
+    php artisan key:generate --force
+  displayName: 'Generate APP_KEY'
 
-# REMOVE key:generate (this causes the error)
+- script: |
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+  displayName: 'Optimize Laravel'
 
-# 3. Laravel optimize
-- script: php artisan optimize
-  displayName: "Optimize Laravel"
-
-# 4. Create artifact (zip)
-- task: ArchiveFiles@2
-  displayName: "Archive project files to app.zip"
-  inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
-    replaceExistingArchive: true
-
-# 5. Publish artifact
 - task: PublishBuildArtifacts@1
-  displayName: "Publish Artifact: phppapp"
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'phppapp'
+    PathtoPublish: '$(System.DefaultWorkingDirectory)'
+    ArtifactName: 'phpapp'
     publishLocation: 'Container'
