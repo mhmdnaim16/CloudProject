@@ -1,0 +1,42 @@
+trigger:
+- main
+- master
+
+pool:
+  name: CloudProjectPool
+
+steps:
+
+# 1. Show PHP version
+- script: php -v
+  displayName: "Show PHP version"
+
+# 2. Install Composer dependencies
+- script: composer install --no-interaction --prefer-dist --optimize-autoloader
+  displayName: "Install Composer dependencies"
+
+# 3. Laravel APP_KEY generate
+- script: php artisan key:generate
+  displayName: "Generate APP_KEY"
+
+# 4. Laravel optimization
+- script: php artisan optimize
+  displayName: "Optimize Laravel"
+
+# 5. Create artifact (App Service standard format)
+- task: ArchiveFiles@2
+  displayName: "Archive project files to app.zip"
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+    replaceExistingArchive: true
+
+# 6. Publish artifact
+- task: PublishBuildArtifacts@1
+  displayName: "Publish Artifact: phppapp"
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'phppapp'
+    publishLocation: 'Container'
